@@ -269,6 +269,16 @@
     .item-steps { counter-reset: step; }
 
     /* ========================
+       ITEM DESCRIPTION
+    ======================== */
+    .item-desc {
+      font-size: 13px; color: var(--primary);
+      background: var(--primary-light);
+      border-radius: 8px; padding: 10px 12px;
+      line-height: 1.6; margin-bottom: 10px;
+    }
+
+    /* ========================
        COMPLETE SCREEN
     ======================== */
     #screen-complete {
@@ -290,7 +300,16 @@
       font-size: 24px; font-weight: 800; line-height: 1.4; margin-bottom: 14px;
     }
     .complete-name { color: var(--primary); }
-    .complete-msg { font-size: 15px; color: var(--gray-500); line-height: 1.75; }
+    .complete-msg { font-size: 15px; color: var(--gray-500); line-height: 1.75; margin-bottom: 28px; }
+    .btn-back {
+      padding: 13px 32px;
+      background: white; color: var(--primary);
+      border: 2px solid var(--primary); border-radius: 12px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-back:active { background: var(--primary-light); }
   </style>
 </head>
 <body>
@@ -338,6 +357,7 @@
     <span class="complete-name" id="complete-name"></span>さん<br>おめでとうございます！
   </h2>
   <p class="complete-msg">すべてのオンボーディングが<br>完了しました。<br>これからよろしくお願いします！</p>
+  <button class="btn-back" id="btn-back-to-main">← 一覧に戻る</button>
 </div>
 
 <script>
@@ -364,6 +384,7 @@ const CATEGORIES = [
       {
         id: 'slack',
         name: 'Slack',
+        desc: '社内コミュニケーションツール。業務連絡はすべてチャンネルで行い、個別DMは原則使用しない。',
         steps: [
           '招待メールを開き「Join Now」ボタンをクリック',
           '名前とパスワードを入力してアカウントを作成',
@@ -376,6 +397,7 @@ const CATEGORIES = [
       {
         id: '1password',
         name: '1Password',
+        desc: 'パスワード管理ツール。業務で使うすべてのパスワードをここで安全に管理・共有する（PC専用）。',
         steps: [
           '招待メールを開き「Join 1Password」をクリック',
           'マスターパスワードを設定する（忘れると復元不可！必ずメモして保管）',
@@ -387,6 +409,7 @@ const CATEGORIES = [
       {
         id: 'jinjer',
         name: 'jinjer',
+        desc: '勤怠・経費精算・稟議申請のツール。毎日の出退勤打刻もアプリから行う。',
         steps: [
           '招待メールを開き「登録はこちら」をクリック',
           'メールアドレスとパスワードを設定してアカウントを作成',
@@ -398,6 +421,7 @@ const CATEGORIES = [
       {
         id: 'dialpad',
         name: 'Dialpad',
+        desc: 'クラウド電話ツール。会社に固定電話はなく、Dialpadが唯一の電話手段。フリーダイヤルへの発信は不可。',
         steps: [
           '招待メールを開き「Accept Invite」をクリック',
           'パスワードを設定してアカウントを作成',
@@ -408,6 +432,7 @@ const CATEGORIES = [
       {
         id: 'sansan',
         name: 'Sansan',
+        desc: '名刺管理ツール。名刺交換後はアプリでスキャンしてデジタル保存。現物は溶解BOXまたはシュレッダーへ。',
         steps: [
           '招待メールからアカウントを作成・ログイン',
           'スマホアプリ（iOS / Android）をインストール',
@@ -417,6 +442,7 @@ const CATEGORIES = [
       {
         id: 'smarthr',
         name: 'SmartHR',
+        desc: '人事・労務手続きツール。引越・結婚・離婚・扶養変更などの申請や、源泉徴収票の確認に使う。',
         steps: [
           '招待メールからアカウントを設定（設定済みの場合はログインのみ）',
           'スマホアプリ（iOS / Android）をインストール・ログイン',
@@ -426,6 +452,7 @@ const CATEGORIES = [
       {
         id: 'notion',
         name: 'Notion',
+        desc: 'タスク・プロジェクト管理ツール。個人タスクの管理や社内情報の共有に使う。プロフィールはSlackと統一する。',
         steps: [
           '招待メールを開き「Join in Notion」をクリック',
           'Googleアカウントまたはメールアドレスでサインアップ',
@@ -438,6 +465,7 @@ const CATEGORIES = [
       {
         id: 'kinugawa',
         name: 'おふぃすごはん きぬ川',
+        desc: '会社のランチ注文サービス。翌営業日の弁当は当日16時までに注文すること。',
         steps: [
           '招待メールからアカウントを作成・ログイン',
           '注文画面から日替わり弁当を選んで注文してみる',
@@ -555,13 +583,12 @@ function renderCards(state) {
       ? `<p class="cat-empty">項目はありません</p>`
       : cat.items.map(item => {
           const itemDone = isItemDone(item, progress);
-          const stepsHtml = (item.steps || []).length > 0
-            ? `<div class="item-body">
-                <ul class="item-steps">
-                  ${item.steps.map(s => `<li>${esc(s)}</li>`).join('')}
-                </ul>
-               </div>`
-            : '';
+          const descHtml = item.desc
+            ? `<p class="item-desc">${esc(item.desc)}</p>` : '';
+          const stepsInner = (item.steps || []).length > 0
+            ? `<ul class="item-steps">${item.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : '';
+          const bodyHtml = (descHtml || stepsInner)
+            ? `<div class="item-body">${descHtml}${stepsInner}</div>` : '';
           return `
             <div class="item-card${itemDone ? ' done' : ''}" data-item-id="${esc(item.id)}">
               <div class="item-header">
@@ -570,10 +597,10 @@ function renderCards(state) {
                 </div>
                 <div class="item-expand">
                   <span class="item-name">${esc(item.name)}</span>
-                  ${stepsHtml ? '<span class="item-chevron">▶</span>' : ''}
+                  ${bodyHtml ? '<span class="item-chevron">▶</span>' : ''}
                 </div>
               </div>
-              ${stepsHtml}
+              ${bodyHtml}
             </div>`;
         }).join('');
 
@@ -642,15 +669,17 @@ function setupDelegation(state) {
 }
 
 // --- 画面切替 ---
+let delegationSetup = false;
 function showScreen(name, state) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
   if (name === 'main') {
     document.getElementById('header-user').textContent = state.user.name;
     refresh(state);
-    setupDelegation(state);
+    if (!delegationSetup) { setupDelegation(state); delegationSetup = true; }
   } else if (name === 'complete') {
     document.getElementById('complete-name').textContent = state.user.name;
+    document.getElementById('btn-back-to-main').onclick = () => showScreen('main', state);
   }
 }
 
