@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>INSTYLE GROUP オンボーディング</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #4F46E5;
+      --primary-light: #EEF2FF;
+      --success:       #059669;
+      --success-light: #ECFDF5;
+      --gray-50:  #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .screen { display: none; }
+
+    /* ========================
+       WELCOME SCREEN
+    ======================== */
+    #screen-welcome {
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+    }
+    #screen-welcome.active { display: flex; }
+
+    .welcome-icon {
+      width: 76px; height: 76px;
+      background: var(--primary);
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(79,70,229,0.25);
+    }
+    .welcome-title {
+      font-size: 22px; font-weight: 800;
+      text-align: center; line-height: 1.4; margin-bottom: 8px;
+    }
+    .welcome-sub {
+      font-size: 14px; color: var(--gray-500);
+      text-align: center; line-height: 1.7; margin-bottom: 40px;
+    }
+    .form-card {
+      background: white; border-radius: 16px;
+      padding: 24px; width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--gray-700); margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%; padding: 13px 16px;
+      border: 1.5px solid var(--gray-200); border-radius: 10px;
+      font-size: 16px; color: var(--gray-900);
+      background: white; outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .form-input::placeholder { color: var(--gray-400); }
+    .form-input:focus { border-color: var(--primary); }
+    .btn-primary {
+      width: 100%; padding: 15px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-primary:active { opacity: 0.85; transform: scale(0.99); }
+
+    /* ========================
+       MAIN SCREEN
+    ======================== */
+    #screen-main.active { display: block; }
+
+    .header {
+      background: white;
+      padding: 14px 20px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      position: sticky; top: 0; z-index: 10;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .header-top {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .header-brand {
+      font-size: 12px; font-weight: 700;
+      color: var(--primary); letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .header-user { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      align-items: baseline; margin-bottom: 7px;
+    }
+    .progress-title { font-size: 14px; font-weight: 700; }
+    .progress-fraction { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+    .progress-bar-bg {
+      background: var(--gray-100); border-radius: 99px; height: 7px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--primary) 0%, #818CF8 100%);
+      height: 100%; border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .cards-container {
+      padding: 14px 14px 32px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    /* ========================
+       CATEGORY CARD
+    ======================== */
+    .cat-card {
+      background: white; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: box-shadow 0.2s;
+    }
+    .cat-card.open { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .cat-header {
+      display: flex; align-items: center;
+      padding: 15px 16px; cursor: pointer; gap: 10px;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+      transition: background 0.15s;
+    }
+    .cat-header:active { background: var(--gray-50); }
+    .cat-chevron {
+      color: var(--gray-400); font-size: 10px;
+      transition: transform 0.25s ease; flex-shrink: 0; line-height: 1;
+    }
+    .cat-card.open .cat-chevron { transform: rotate(90deg); }
+    .cat-title { font-size: 15px; font-weight: 700; color: var(--gray-900); flex: 1; }
+    .cat-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .cat-count { font-size: 12px; color: var(--gray-400); font-weight: 500; }
+    .cat-stamp { font-size: 20px; display: none; transform-origin: center; }
+    .cat-card.done .cat-stamp {
+      display: inline-block;
+      animation: stampIn 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes stampIn {
+      0%   { transform: scale(3) rotate(-15deg); opacity: 0; }
+      55%  { transform: scale(0.88) rotate(-10deg); opacity: 1; }
+      78%  { transform: scale(1.08) rotate(-12deg); }
+      100% { transform: scale(1) rotate(-12deg); }
+    }
+    .cat-card.done .cat-header { background: var(--success-light); }
+    .cat-card.done .cat-title  { color: var(--success); }
+    .cat-card.done .cat-count  { color: var(--success); opacity: 0.7; }
+    .cat-body {
+      display: none; border-top: 1px solid var(--gray-100); padding: 8px;
+    }
+    .cat-card.open .cat-body { display: block; }
+    .cat-empty { padding: 14px; font-size: 13px; color: var(--gray-400); text-align: center; }
+
+    /* ========================
+       ITEM CARD
+    ======================== */
+    .item-card {
+      border-radius: 10px; margin-bottom: 4px; overflow: hidden;
+    }
+    .item-card:last-child { margin-bottom: 0; }
+
+    /* ヘッダー：左のチェックボックスで完了トグル、右の名前＋矢印で展開 */
+    .item-header {
+      display: flex; align-items: center;
+      background: var(--gray-50); border-radius: 10px;
+      -webkit-tap-highlight-color: transparent; user-select: none;
+      transition: background 0.15s;
+      overflow: hidden;
+    }
+    .item-card.open .item-header { border-radius: 10px 10px 0 0; }
+    .item-card.done .item-header { background: var(--success-light); }
+    .item-card.done.open .item-header { border-radius: 10px 10px 0 0; }
+
+    /* チェックボックス部分（タップで完了トグル） */
+    .item-toggle {
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px 4px 12px 12px;
+      cursor: pointer; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item-check-box {
+      width: 22px; height: 22px;
+      border: 2px solid var(--gray-200); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+      background: white; flex-shrink: 0;
+    }
+    .item-card.done .item-check-box {
+      background: var(--success); border-color: var(--success);
+    }
+    .item-check-mark {
+      color: white; font-size: 13px; font-weight: 700;
+      display: none; line-height: 1;
+    }
+    .item-card.done .item-check-mark { display: block; }
+
+    /* 名前＋展開矢印（タップで展開） */
+    .item-expand {
+      display: flex; align-items: center;
+      flex: 1; padding: 12px 12px 12px 10px;
+      cursor: pointer; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item-name {
+      font-size: 14px; font-weight: 600;
+      color: var(--gray-700); flex: 1;
+    }
+    .item-card.done .item-name { color: var(--success); }
+    .item-chevron {
+      color: var(--gray-400); font-size: 9px;
+      transition: transform 0.2s; flex-shrink: 0; line-height: 1;
+    }
+    .item-card.open .item-chevron { transform: rotate(90deg); }
+
+    /* 展開エリア：手順の読み取り専用リスト */
+    .item-body {
+      display: none;
+      background: white;
+      border: 1px solid var(--gray-100); border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding: 12px 14px;
+    }
+    .item-card.open .item-body { display: block; }
+
+    .item-steps {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .item-steps li {
+      display: flex; gap: 8px;
+      font-size: 13px; color: var(--gray-500); line-height: 1.5;
+    }
+    .item-steps li::before {
+      content: counter(step);
+      counter-increment: step;
+      font-size: 11px; font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      border-radius: 4px;
+      min-width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .item-steps { counter-reset: step; }
+
+    /* ========================
+       COMPLETE SCREEN
+    ======================== */
+    #screen-complete {
+      min-height: 100vh;
+      flex-direction: column; align-items: center;
+      justify-content: center; padding: 32px 24px; text-align: center;
+    }
+    #screen-complete.active { display: flex; }
+    .complete-emoji {
+      font-size: 72px; margin-bottom: 24px;
+      animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+      70%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .complete-title {
+      font-size: 24px; font-weight: 800; line-height: 1.4; margin-bottom: 14px;
+    }
+    .complete-name { color: var(--primary); }
+    .complete-msg { font-size: 15px; color: var(--gray-500); line-height: 1.75; }
+  </style>
+</head>
+<body>
+
+<!-- ===== ウェルカム画面 ===== -->
+<div id="screen-welcome" class="screen">
+  <div class="welcome-icon">🚀</div>
+  <h1 class="welcome-title">INSTYLE GROUP<br>オンボーディング</h1>
+  <p class="welcome-sub">ようこそ！<br>以下を入力してスタートしましょう。</p>
+  <div class="form-card">
+    <div class="form-group">
+      <label class="form-label" for="input-name">お名前</label>
+      <input class="form-input" id="input-name" type="text" placeholder="山田 太郎" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="input-member">アプリ会員番号</label>
+      <input class="form-input" id="input-member" type="text" placeholder="例）123456" inputmode="numeric">
+    </div>
+  </div>
+  <button class="btn-primary" id="btn-start">はじめる →</button>
+</div>
+
+<!-- ===== メイン画面 ===== -->
+<div id="screen-main" class="screen">
+  <div class="header">
+    <div class="header-top">
+      <span class="header-brand">INSTYLE GROUP</span>
+      <span class="header-user" id="header-user"></span>
+    </div>
+    <div class="progress-label">
+      <span class="progress-title" id="progress-title">オンボーディング</span>
+      <span class="progress-fraction" id="progress-fraction">0 / 0 完了</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="cards-container" id="cards-container"></div>
+</div>
+
+<!-- ===== 完了画面 ===== -->
+<div id="screen-complete" class="screen">
+  <div class="complete-emoji">🎉</div>
+  <h2 class="complete-title">
+    <span class="complete-name" id="complete-name"></span>さん<br>おめでとうございます！
+  </h2>
+  <p class="complete-msg">すべてのオンボーディングが<br>完了しました。<br>これからよろしくお願いします！</p>
+</div>
+
+<script>
+// ================================================================
+// ★ CONFIG：Zapier Webhook URL をここに貼るだけで通知が届きます ★
+// ================================================================
+const CONFIG = {
+  zapierWebhookUrl: '', // 例: 'https://hooks.zapier.com/hooks/catch/xxxxx/yyyyy/'
+};
+
+// ================================================================
+// ★ CATEGORIES：カード・項目を自由に追加/削除できます ★
+//
+//  カテゴリを追加  → { id, title, items:[...] } を末尾に追加
+//  カテゴリを削除  → 該当ブロックを丸ごと削除
+//  項目を追加      → items 内に { id, name, steps:[...] } を追加
+//  手順を追加      → steps 内に文字列を追加（表示のみ・チェックなし）
+// ================================================================
+const CATEGORIES = [
+  {
+    id: 'tools',
+    title: '1. ツール設定',
+    items: [
+      {
+        id: 'slack',
+        name: 'Slack',
+        steps: [
+          '招待メールを開き「Join Now」ボタンをクリック',
+          '名前とパスワードを入力してアカウントを作成',
+          'PCアプリをダウンロードしてログイン（Windows / Mac）',
+          'スマホアプリ（iOS / Android）もインストールしてログイン',
+          'ワークスペース INSTYLE GROUP に参加する',
+          'プロフィールを設定する（表示名：ローマ字（漢字）・顔写真必須）',
+        ],
+      },
+      {
+        id: '1password',
+        name: '1Password',
+        steps: [
+          '招待メールを開き「Join 1Password」をクリック',
+          'マスターパスワードを設定する（忘れると復元不可！必ずメモして保管）',
+          'PCアプリ（Windows / Mac）をダウンロードしてログイン',
+          'ブラウザ拡張機能（Chrome）をインストール',
+          'INSTYLE GROUP と関わる事業のアカウントに紐づける',
+        ],
+      },
+      {
+        id: 'jinjer',
+        name: 'jinjer',
+        steps: [
+          '招待メールを開き「登録はこちら」をクリック',
+          'メールアドレスとパスワードを設定してアカウントを作成',
+          'スマホアプリ（iOS / Android）をインストール・ログイン',
+          '勤怠マニュアルを確認して打刻方法を把握する',
+          '翌営業日から毎朝・毎夜の打刻を忘れない準備をする',
+        ],
+      },
+      {
+        id: 'dialpad',
+        name: 'Dialpad',
+        steps: [
+          '招待メールを開き「Accept Invite」をクリック',
+          'パスワードを設定してアカウントを作成',
+          'スマホアプリ（iOS / Android）をインストール・ログイン',
+          '会社マニュアルを確認して設定ルールに従う',
+        ],
+      },
+      {
+        id: 'sansan',
+        name: 'Sansan',
+        steps: [
+          '招待メールからアカウントを作成・ログイン',
+          'スマホアプリ（iOS / Android）をインストール',
+          'アプリの「名刺スキャン」機能を試してみる',
+        ],
+      },
+      {
+        id: 'smarthr',
+        name: 'SmartHR',
+        steps: [
+          '招待メールからアカウントを設定（設定済みの場合はログインのみ）',
+          'スマホアプリ（iOS / Android）をインストール・ログイン',
+          '初回ログイン後、個人情報の確認・入力を完了させる',
+        ],
+      },
+      {
+        id: 'notion',
+        name: 'Notion',
+        steps: [
+          '招待メールを開き「Join in Notion」をクリック',
+          'Googleアカウントまたはメールアドレスでサインアップ',
+          'スマホアプリ（iOS / Android）もインストール・ログイン',
+          '登録名をアルファベット表記に変更する（例：Taro Yamada）',
+          'アイコンを Slack と同じ顔写真に設定する',
+          '「個人タスク一覧」の下に自分の個人タスクページを作成する',
+        ],
+      },
+      {
+        id: 'kinugawa',
+        name: 'おふぃすごはん きぬ川',
+        steps: [
+          '招待メールからアカウントを作成・ログイン',
+          '注文画面から日替わり弁当を選んで注文してみる',
+        ],
+      },
+      // ← ここに項目を追加
+    ],
+  },
+  {
+    id: 'culture',
+    title: '2. 文化',
+    items: [
+      // ← ここに項目を追加
+    ],
+  },
+  // ← ここにカテゴリを追加
+];
+
+// ================================================================
+// アプリロジック（通常は編集不要）
+// ================================================================
+
+const LS_KEY = 'instyle_onboarding';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// --- 集計 ---
+function allItems() { return CATEGORIES.flatMap(c => c.items); }
+function totalItemCount() { return allItems().length; }
+function isItemDone(item, progress) { return progress[item.id] === true; }
+function isCatDone(cat, progress) {
+  return cat.items.length > 0 && cat.items.every(i => isItemDone(i, progress));
+}
+function completedItemCount(progress) {
+  return allItems().filter(i => isItemDone(i, progress)).length;
+}
+function isAllDone(progress) {
+  const cats = CATEGORIES.filter(c => c.items.length > 0);
+  return cats.length > 0 && cats.every(c => isCatDone(c, progress));
+}
+function findCat(id) { return CATEGORIES.find(c => c.id === id) || null; }
+
+// --- 通知 ---
+function sendWebhook(payload) {
+  if (!CONFIG.zapierWebhookUrl) return;
+  fetch(CONFIG.zapierWebhookUrl, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
+function checkNotify(state, changedCatId) {
+  const progress = state.progress || {};
+  const notifiedCats = state.notifiedCategories || [];
+  const user = state.user || {};
+  const now = new Date().toLocaleString('ja-JP');
+
+  const cat = findCat(changedCatId);
+  if (cat && isCatDone(cat, progress) && !notifiedCats.includes(changedCatId)) {
+    notifiedCats.push(changedCatId);
+    state.notifiedCategories = notifiedCats;
+    saveState(state);
+    sendWebhook({ type: 'category_complete', name: user.name, memberId: user.memberId, categoryTitle: cat.title, completedAt: now });
+  }
+
+  if (isAllDone(progress) && !state.notifiedAll) {
+    state.notifiedAll = true;
+    saveState(state);
+    sendWebhook({ type: 'all_complete', name: user.name, memberId: user.memberId, categoryTitle: '全カテゴリ完了', completedAt: now });
+    setTimeout(() => showScreen('complete', state), 700);
+  }
+}
+
+// --- 描画 ---
+function renderProgress(state) {
+  const progress = state.progress || {};
+  const total = totalItemCount();
+  const done  = completedItemCount(progress);
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-fraction').textContent = `${done} / ${total} 完了`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-title').textContent =
+    (done === total && total > 0) ? '🎉 オンボーディング完了！' : 'オンボーディング';
+}
+
+function getOpenCatIds()  { return [...document.querySelectorAll('.cat-card.open')].map(el => el.dataset.catId); }
+function getOpenItemIds() { return [...document.querySelectorAll('.item-card.open')].map(el => el.dataset.itemId); }
+
+function renderCards(state) {
+  const progress = state.progress || {};
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+
+  CATEGORIES.forEach(cat => {
+    const done = isCatDone(cat, progress);
+    const doneCount = cat.items.filter(i => isItemDone(i, progress)).length;
+    const countText = cat.items.length > 0 ? `${doneCount} / ${cat.items.length}` : '';
+
+    const card = document.createElement('div');
+    card.className = 'cat-card' + (done ? ' done' : '');
+    card.dataset.catId = cat.id;
+
+    const bodyHtml = cat.items.length === 0
+      ? `<p class="cat-empty">項目はありません</p>`
+      : cat.items.map(item => {
+          const itemDone = isItemDone(item, progress);
+          const stepsHtml = (item.steps || []).length > 0
+            ? `<div class="item-body">
+                <ul class="item-steps">
+                  ${item.steps.map(s => `<li>${esc(s)}</li>`).join('')}
+                </ul>
+               </div>`
+            : '';
+          return `
+            <div class="item-card${itemDone ? ' done' : ''}" data-item-id="${esc(item.id)}">
+              <div class="item-header">
+                <div class="item-toggle">
+                  <div class="item-check-box"><span class="item-check-mark">✓</span></div>
+                </div>
+                <div class="item-expand">
+                  <span class="item-name">${esc(item.name)}</span>
+                  ${stepsHtml ? '<span class="item-chevron">▶</span>' : ''}
+                </div>
+              </div>
+              ${stepsHtml}
+            </div>`;
+        }).join('');
+
+    card.innerHTML = `
+      <div class="cat-header">
+        <span class="cat-chevron">▶</span>
+        <span class="cat-title">${esc(cat.title)}</span>
+        <div class="cat-meta">
+          <span class="cat-count">${countText}</span>
+          <span class="cat-stamp">✅</span>
+        </div>
+      </div>
+      <div class="cat-body">${bodyHtml}</div>`;
+
+    container.appendChild(card);
+  });
+}
+
+function refresh(state) {
+  const openCats  = getOpenCatIds();
+  const openItems = getOpenItemIds();
+  renderCards(state);
+  renderProgress(state);
+  openCats.forEach(id => {
+    const el = document.querySelector(`.cat-card[data-cat-id="${id}"]`);
+    if (el) el.classList.add('open');
+  });
+  openItems.forEach(id => {
+    const el = document.querySelector(`.item-card[data-item-id="${id}"]`);
+    if (el) el.classList.add('open');
+  });
+}
+
+// --- イベント（委譲）---
+function setupDelegation(state) {
+  const container = document.getElementById('cards-container');
+  container.addEventListener('click', e => {
+
+    // カテゴリヘッダー → 展開/収納
+    if (e.target.closest('.cat-header')) {
+      e.target.closest('.cat-card').classList.toggle('open');
+      return;
+    }
+
+    // チェックボックス → 完了トグル（展開イベントを止める）
+    if (e.target.closest('.item-toggle')) {
+      e.stopPropagation();
+      const itemCard = e.target.closest('.item-card');
+      const itemId   = itemCard.dataset.itemId;
+      const progress = state.progress || {};
+      progress[itemId] = !progress[itemId];
+      state.progress = progress;
+      saveState(state);
+      const catId = itemCard.closest('.cat-card').dataset.catId;
+      refresh(state);
+      checkNotify(state, catId);
+      return;
+    }
+
+    // 名前エリア → 手順を展開/収納
+    if (e.target.closest('.item-expand')) {
+      e.target.closest('.item-card').classList.toggle('open');
+      return;
+    }
+  });
+}
+
+// --- 画面切替 ---
+function showScreen(name, state) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'main') {
+    document.getElementById('header-user').textContent = state.user.name;
+    refresh(state);
+    setupDelegation(state);
+  } else if (name === 'complete') {
+    document.getElementById('complete-name').textContent = state.user.name;
+  }
+}
+
+// --- 起動 ---
+(function init() {
+  const state = loadState();
+  if (state.user) {
+    isAllDone(state.progress || {}) && totalItemCount() > 0
+      ? showScreen('complete', state)
+      : showScreen('main', state);
+  } else {
+    showScreen('welcome', state);
+  }
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    const name     = document.getElementById('input-name').value.trim();
+    const memberId = document.getElementById('input-member').value.trim();
+    if (!name || !memberId) { alert('お名前とアプリ会員番号を入力してください。'); return; }
+    const newState = { user: { name, memberId }, progress: {}, notifiedCategories: [], notifiedAll: false };
+    saveState(newState);
+    showScreen('main', newState);
+  });
+})();
+</script>
+</body>
+</html>
